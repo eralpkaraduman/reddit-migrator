@@ -1,69 +1,79 @@
-'use strict';
-var passport = require('passport');
-var RedditStrategy = require('passport-reddit').Strategy;
-var session = require('express-session');
+var request = require('request');
 
+'use strict';
 require('dotenv').config();
 
-passport.use(new RedditStrategy({
-	clientID: process.env.REDDIT_CONSUMER_KEY,
-	clientSecret: process.env.REDDIT_CONSUMER_SECRET,
-	callbackURL: process.env.REDDIT_REDIRECT_URI,
-	state: true
-},
-	function (accessToken, refreshToken, profile, done) {
-		process.nextTick(function () {
-			return done(null, profile);
-		});
-	}
-));
+var TYPE = 'code';
+var CLIENT_ID = process.env.REDDIT_CONSUMER_KEY;
+var CLIENT_SECRET = process.env.REDDIT_CONSUMER_SECRET;
+var REDDIT_REDIRECT_URI = process.env.REDDIT_REDIRECT_URI;
+var RESULT_REDIRECT_URI = process.env.RESULT_REDIRECT_URI;
+var DURATION = 'temporary';
+var GRANT_TYPE='authorization_code';
+var SCOPE_STRING = encodeURIComponent([
+	'identity',
+	'mysubreddits',
+	'subscribe',
+].join(' '));
 
+function getAuthorizationURL(state) {
+	return `https://www.reddit.com/api/v1/authorize` +
+	`?client_id=${CLIENT_ID}` +
+	`&response_type=${TYPE}` + 
+	`&state=${state}` +
+	`&redirect_uri=${REDDIT_REDIRECT_URI}` + 
+	`&duration=${DURATION}` +
+	`&scope=${SCOPE_STRING}`;
+};
 
-exports.handleAuth = (req, res, next) => {
-	session({
-		resave: false,
-		saveUninitialized: false,
-		secret: 'SECRET'
-	})(req, res, () => {
-		passport.initialize()(req, res, () => {
-			passport.session()(req, res, () => {
-				
-				
-				var state = req.query.state;
-				var code = req.query.code;
-				
-				
-			
-				// begin auth
-				if (state && !code) {
-					console.log('MODE: DO AUTH');
-					passport.authenticate('reddit', {
-						state: state
-					})(req, res, next);
-				}
-				
-				// handle redirect
-				else if (code) {
-					console.log('MODE: HANDLE AUTH REDIRECT');
-					passport.authenticate('reddit', {
-						successRedirect: '/#SUCCESS',
-						failureRedirect: '/#FAILED'
-					})(req, res, next);
-				}
-				
-				else {
-					console.log('MODE: LOL');
-					
-				}
-				
-				
-			})
-		});
-		
-	})
-	
-	
-	 
+function getResultRedirectUri(data) {
+	return `${RESULT_REDIRECT_URI}#${encodeURIComponent(JSON.stringify(data))}`;
 }
 
+exports.handleAuth = (req, res) => {
+	var code = req.query.code;
+	var state = req.query.state;
 
+	if (code) {
+		var bodyText = `grant_type=${GRANT_TYPE}` +
+		`&code=${code}` +
+		`&redirect_uri=${REDDIT_REDIRECT_URI}`;
+
+		request.post(`https://${CLIENT_ID}:${CLIENT_SECRET}@www.reddit.com/api/v1/access_token`, {
+			body: bodyText
+		}, (error, response) => {
+			if (error) {
+				res.redirect(getResultRedirectUri({
+					status: 'failed',
+					error: 'Failed to access reddit for getting token (error: ' + error + ')'
+				}));
+			}
+			else if (response.statusCode !== 200){
+				res.redirect(getResultRedirectUri({
+					status: 'failed',
+					error: 'Failed to get token (status code: ' + response.statusCode + ')'
+				}));
+			}
+			else {
+				var json = null;
+				try {
+					json = JSON.parse(response.body)
+				} catch(error) {
+					res.redirect(getResultRedirectUri({
+						status: 'failed',
+						error: 'json parse error'
+					}));
+					return;
+				}
+
+				json.status = 'success';
+				json.state = state;
+				res.redirect(getResultRedirectUri(json));
+			}
+		});
+	}
+	else {
+		var state = req.query.state || 'STATE_NOT_SPECIFIED';
+		res.redirect(getAuthorizationURL(state));
+	}
+}

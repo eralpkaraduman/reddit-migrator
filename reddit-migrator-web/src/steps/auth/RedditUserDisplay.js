@@ -20,7 +20,7 @@ class RedditUserDisplay extends Component {
 					</Card.Meta>
 					
 					<Card.Description>
-						
+						{this.props.accessToken}
 					</Card.Description>
 
 				</Card.Content>
