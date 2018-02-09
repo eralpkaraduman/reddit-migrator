@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { Button, Grid, Card } from 'semantic-ui-react';
 import RedditUserDisplay from './RedditUserDisplay';
 import * as Reddit from '../../RedditUtils';
-import _ from 'underscore';
+
 
 class AuthStep extends Component {
 
@@ -13,66 +13,19 @@ class AuthStep extends Component {
   }
 
   componentDidMount() {
-    let hashJson = this.checkhashForAuthResponse();
+    let hashJson = Reddit.getAuthResponseAsJsonFromHash();
     
     if (hashJson) {
-      const {status, state} = hashJson;
-      if (status === 'success') {
-        const deckIndex = parseInt(state.split('DECK_')[1]);
-        if (!_.isNaN(deckIndex)) {
-          console.log(`received auth response for deck ${deckIndex}`);
-          hashJson = _.omit(hashJson, 'state');
-          hashJson = _.omit(hashJson, 'status');
-          this.saveAuthResponseData(deckIndex, hashJson);
-        }
-        else {
-          console.log(`received auth response for invalid deck index`);
-        }
-      }
-
-      window.location.hash = '';
+      Reddit.loadAuthDataFromHashJson(hashJson);
+      window.location.hash = ''; // removed the hash and reloads the page
     }
-
+    
     this.loadAuthDataFromLocalStorage();
   }
 
-  checkhashForAuthResponse() {
-    let hashJson = null;
-    const {hash} = window.location;
-    if (!_.isNull(hash) && !_.isEmpty(hash) && _.isString(hash)) {
-      const encodedHashJsonText = hash.split('#')[1];
-      const hashJsonText = decodeURIComponent(encodedHashJsonText);
-      
-      try {
-        hashJson = JSON.parse(hashJsonText);
-      }
-      catch(error) {
-        console.error(`Failed to parse hash string as json: ${hashJsonText} error: ${error}`);
-      }
-      
-    }
-    return hashJson;
-  }
-
-  saveAuthResponseData(deckIndex, data) {
-    localStorage.setItem(`REDDIT_TOKEN_DECK_${deckIndex}`, JSON.stringify(data));
-  }
-
-  loadAuthResponseData(deckIndex) {
-    const dataJsonString = localStorage.getItem(`REDDIT_TOKEN_DECK_${deckIndex}`);
-    let dataJson = null;
-    try {
-      dataJson = JSON.parse(dataJsonString)
-    }
-    catch (error) {
-      console.error('failed to parse loaded auth responseData from localstorage error: ' + error);
-    }
-    return dataJson;
-  }
-
   loadAuthDataFromLocalStorage() {
-    const tokenDataDeckA = this.loadAuthResponseData(0);
-    const tokenDataDeckB = this.loadAuthResponseData(1);
+    const tokenDataDeckA =  Reddit.loadAuthResponseDataFromLocalStorage(0);
+    const tokenDataDeckB =  Reddit.loadAuthResponseDataFromLocalStorage(1);
     this.setState(() => ({tokenDataDeckA, tokenDataDeckB}));
   }
 
@@ -85,11 +38,19 @@ class AuthStep extends Component {
     });
   }
   
-  beginGetToken = index => {
-    const state = `DECK_${index}`;
-    window.location = `http://localhost:3333?state=${state}`;
+  handleOnClearToken = (deckIndex) => {
+    Reddit.removeAuthResponseDataFromLocalStorage(deckIndex);
+    this.loadAuthDataFromLocalStorage();
   }
   
+  onDeckReadyStatusChanged = (deckIndex, ready) => {
+    console.log('onDeckReadyStatusChanged ready:' + ready);
+  }
+  
+  onDeckUserIdChanged = (deckIndex, userId) => {
+    console.log('onDeckUserIdChanged userId:' + userId);
+  }
+
   render() {
     const {tokenDataDeckA, tokenDataDeckB} = this.state;
     const tokenA = tokenDataDeckA && tokenDataDeckA.access_token || null;
@@ -101,14 +62,21 @@ class AuthStep extends Component {
             <Card.Group centered>
 
                 <RedditUserDisplay
-                  isDeckA
+                  deckIndex={0}
                   accessToken={tokenA}
-                  onAuthenticate={() => this.beginGetToken(0)}
+                  onAuthenticate={() => Reddit.launchAuthUrl(0)}
+                  onClearToken={() => this.handleOnClearToken(0)}
+                  onReadyStatusChanged={ready => this.onDeckReadyStatusChanged(0, ready)}
+                  onUserIdChanged={userId => this.onDeckUserIdChanged(0, userId)}
                 />
 
                 <RedditUserDisplay
+                  deckIndex={1}
                   accessToken={tokenB}
-                  onAuthenticate={() => this.beginGetToken(1)}
+                  onAuthenticate={() => Reddit.launchAuthUrl(1)}
+                  onClearToken={() => this.handleOnClearToken(1)}
+                  onReadyStatusChanged={ready => this.onDeckReadyStatusChanged(1, ready)}
+                  onUserIdChanged={userId => this.onDeckUserIdChanged(1, userId)}
                 />
 
             </Card.Group>

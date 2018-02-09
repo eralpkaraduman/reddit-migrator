@@ -1,6 +1,6 @@
+'use strict';
 var request = require('request');
 
-'use strict';
 require('dotenv').config();
 
 var TYPE = 'code';
@@ -34,14 +34,14 @@ exports.handleAuth = (req, res) => {
 	var code = req.query.code;
 	var state = req.query.state;
 
+	// MODE: handle redirect from auth page
 	if (code) {
-		var bodyText = `grant_type=${GRANT_TYPE}` +
+		var body = 
+		`grant_type=${GRANT_TYPE}` +
 		`&code=${code}` +
 		`&redirect_uri=${REDDIT_REDIRECT_URI}`;
 
-		request.post(`https://${CLIENT_ID}:${CLIENT_SECRET}@www.reddit.com/api/v1/access_token`, {
-			body: bodyText
-		}, (error, response) => {
+		request.post(`https://${CLIENT_ID}:${CLIENT_SECRET}@www.reddit.com/api/v1/access_token`, {body}, (error, response) => {
 			if (error) {
 				res.redirect(getResultRedirectUri({
 					status: 'failed',
@@ -72,6 +72,8 @@ exports.handleAuth = (req, res) => {
 			}
 		});
 	}
+	
+	// MODE: redirect to auth page
 	else {
 		var state = req.query.state || 'STATE_NOT_SPECIFIED';
 		res.redirect(getAuthorizationURL(state));
