@@ -9,7 +9,11 @@ class AuthStep extends Component {
 
   state = {
     tokenDataDeckA: null,
-    tokenDataDeckB: null
+    tokenDataDeckB: null,
+    userIdDeckA: null,
+    userIdDeckB: null,
+    isDeckAReady: false,
+    isDeckBReady: false
   }
 
   componentDidMount() {
@@ -44,11 +48,37 @@ class AuthStep extends Component {
   }
   
   onDeckReadyStatusChanged = (deckIndex, ready) => {
-    console.log('onDeckReadyStatusChanged ready:' + ready);
+    if (deckIndex === 0) {
+      this.setState(() => ({isDeckAReady: ready}));
+    }
+    else if (deckIndex === 1) {
+      this.setState(() => ({isDeckBReady: ready}));
+    }
   }
   
   onDeckUserIdChanged = (deckIndex, userId) => {
-    console.log('onDeckUserIdChanged userId:' + userId);
+    if (deckIndex === 0) {
+      this.setState(() => ({userIdDeckA: userId}));
+    }
+    else if (deckIndex === 1) {
+      this.setState(() => ({userIdDeckA: userId}));
+    }
+  }
+
+  canContinue = () => {
+    const {
+      tokenDataDeckA,
+      tokenDataDeckB,
+      userIdDeckA,
+      userIdDeckB,
+      isDeckAReady,
+      isDeckBReady
+    } = this.state;
+    
+    const hasBothTokens = !_.isNull(tokenDataDeckA) && !_.isNull(tokenDataDeckB);
+    const hasBothUserIds = !_.isNull(userIdDeckA) && !_.isNull(userIdDeckB);
+    const bothAreReady = isDeckAReady && isDeckBReady;
+    const userIdsAreDifferent = !_.isEqual(userIdDeckA, userIdDeckB);
   }
 
   render() {
