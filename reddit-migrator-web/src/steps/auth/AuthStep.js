@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Button, Grid, Card } from 'semantic-ui-react';
+import { Button, Grid, Card, Message } from 'semantic-ui-react';
 import RedditUserDisplay from './RedditUserDisplay';
 import * as Reddit from '../../RedditUtils';
-
+import _ from 'underscore';
 
 class AuthStep extends Component {
 
@@ -18,19 +18,19 @@ class AuthStep extends Component {
 
   componentDidMount() {
     let hashJson = Reddit.getAuthResponseAsJsonFromHash();
-    
+
     if (hashJson) {
       Reddit.loadAuthDataFromHashJson(hashJson);
       window.location.hash = ''; // removed the hash and reloads the page
     }
-    
+
     this.loadAuthDataFromLocalStorage();
   }
 
   loadAuthDataFromLocalStorage() {
-    const tokenDataDeckA =  Reddit.loadAuthResponseDataFromLocalStorage(0);
-    const tokenDataDeckB =  Reddit.loadAuthResponseDataFromLocalStorage(1);
-    this.setState(() => ({tokenDataDeckA, tokenDataDeckB}));
+    const tokenDataDeckA = Reddit.loadAuthResponseDataFromLocalStorage(0);
+    const tokenDataDeckB = Reddit.loadAuthResponseDataFromLocalStorage(1);
+    this.setState(() => ({ tokenDataDeckA, tokenDataDeckB }));
   }
 
   handleOnContinueClicked = () => {
@@ -41,31 +41,31 @@ class AuthStep extends Component {
       ]
     });
   }
-  
+
   handleOnClearToken = (deckIndex) => {
     Reddit.removeAuthResponseDataFromLocalStorage(deckIndex);
     this.loadAuthDataFromLocalStorage();
   }
-  
+
   onDeckReadyStatusChanged = (deckIndex, ready) => {
     if (deckIndex === 0) {
-      this.setState(() => ({isDeckAReady: ready}));
+      this.setState(() => ({ isDeckAReady: ready }));
     }
     else if (deckIndex === 1) {
-      this.setState(() => ({isDeckBReady: ready}));
-    }
-  }
-  
-  onDeckUserIdChanged = (deckIndex, userId) => {
-    if (deckIndex === 0) {
-      this.setState(() => ({userIdDeckA: userId}));
-    }
-    else if (deckIndex === 1) {
-      this.setState(() => ({userIdDeckA: userId}));
+      this.setState(() => ({ isDeckBReady: ready }));
     }
   }
 
-  canContinue = () => {
+  onDeckUserIdChanged = (deckIndex, userId) => {
+    if (deckIndex === 0) {
+      this.setState(() => ({ userIdDeckA: userId }));
+    }
+    else if (deckIndex === 1) {
+      this.setState(() => ({ userIdDeckA: userId }));
+    }
+  }
+
+  getError = () => {
     const {
       tokenDataDeckA,
       tokenDataDeckB,
@@ -74,48 +74,74 @@ class AuthStep extends Component {
       isDeckAReady,
       isDeckBReady
     } = this.state;
-    
+
     const hasBothTokens = !_.isNull(tokenDataDeckA) && !_.isNull(tokenDataDeckB);
     const hasBothUserIds = !_.isNull(userIdDeckA) && !_.isNull(userIdDeckB);
     const bothAreReady = isDeckAReady && isDeckBReady;
     const userIdsAreDifferent = !_.isEqual(userIdDeckA, userIdDeckB);
+
+    if (!hasBothTokens) {
+      return 'One of the decks missing access token.';
+    }
+    else if (!hasBothUserIds) {
+      return 'One of the user ids is missing.';
+    }
+    else if (!bothAreReady) {
+      return 'One of the decks is not ready.';
+    }
+    else if (!userIdsAreDifferent) {
+      return 'Connected users in both decks are the same.';
+    }
+    else {
+      return null;
+    }
   }
 
   render() {
-    const {tokenDataDeckA, tokenDataDeckB} = this.state;
+    const { tokenDataDeckA, tokenDataDeckB } = this.state;
     const tokenA = tokenDataDeckA && tokenDataDeckA.access_token || null;
     const tokenB = tokenDataDeckB && tokenDataDeckB.access_token || null;
+    const error = this.getError();
+    const canContinue = !!error;
     return (
       <Grid>
         <Grid.Column >
-          
-            <Card.Group centered>
 
-                <RedditUserDisplay
-                  deckIndex={0}
-                  accessToken={tokenA}
-                  onAuthenticate={() => Reddit.launchAuthUrl(0)}
-                  onClearToken={() => this.handleOnClearToken(0)}
-                  onReadyStatusChanged={ready => this.onDeckReadyStatusChanged(0, ready)}
-                  onUserIdChanged={userId => this.onDeckUserIdChanged(0, userId)}
-                />
+          <Card.Group centered>
 
-                <RedditUserDisplay
-                  deckIndex={1}
-                  accessToken={tokenB}
-                  onAuthenticate={() => Reddit.launchAuthUrl(1)}
-                  onClearToken={() => this.handleOnClearToken(1)}
-                  onReadyStatusChanged={ready => this.onDeckReadyStatusChanged(1, ready)}
-                  onUserIdChanged={userId => this.onDeckUserIdChanged(1, userId)}
-                />
+            <RedditUserDisplay
+              deckIndex={ 0 }
+              accessToken={ tokenA }
+              onAuthenticate={ () => Reddit.launchAuthUrl(0) }
+              onClearToken={ () => this.handleOnClearToken(0) }
+              onReadyStatusChanged={ ready => this.onDeckReadyStatusChanged(0, ready) }
+              onUserIdChanged={ userId => this.onDeckUserIdChanged(0, userId) }
+            />
 
-            </Card.Group>
+            <RedditUserDisplay
+              deckIndex={ 1 }
+              accessToken={ tokenB }
+              onAuthenticate={ () => Reddit.launchAuthUrl(1) }
+              onClearToken={ () => this.handleOnClearToken(1) }
+              onReadyStatusChanged={ ready => this.onDeckReadyStatusChanged(1, ready) }
+              onUserIdChanged={ userId => this.onDeckUserIdChanged(1, userId) }
+            />
+
+          </Card.Group>
+
+          { error &&
+            <Message negative>
+              <Message.Header>Can't continue yet!</Message.Header>
+              <p>{ error }</p>
+            </Message>
+          }
 
           <Button
-            floated='right'
-            style={{marginTop: 12}}
             primary
-            onClick={this.handleOnContinueClicked}>
+            floated='right'
+            disabled={ canContinue }
+            style={ { marginTop: 12 } }
+            onClick={ this.handleOnContinueClicked }>
             Continue
           </Button>
         </Grid.Column>
