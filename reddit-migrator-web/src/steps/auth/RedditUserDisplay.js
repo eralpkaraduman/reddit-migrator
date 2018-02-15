@@ -26,36 +26,42 @@ class RedditUserDisplay extends Component {
 	componentWillReceiveProps(nextProps) {
 		const {accessToken} = nextProps
 		const accessTokenChanged = accessToken !== this.props.accessToken;
-		if (accessTokenChanged && !_.isNull(accessToken) && !_.isEmpty(accessToken)) {
+		if (accessTokenChanged) {
+			if (!_.isNull(accessToken) && !_.isEmpty(accessToken)) {
 
-			this.setState(() => ({
-				authenticated: undefined,
-				userDataFetchStatus: 'pending'
-			}));
-			
-			Reddit.fetchRedditApi(accessToken, 'me')
-			.then(userData => {
 				this.setState(() => ({
-					userData,
-					authenticated: true,
-					userDataFetchStatus: 'success'
+					authenticated: undefined,
+					userDataFetchStatus: 'pending'
 				}));
-			})
-			.catch((error) => {
-				const authenticated = error === 'unauthorized' ? false : undefined;
+				
+				// Fetcing user data from reddit
+				Reddit.fetchRedditApi(accessToken, 'me')
+				.then(userData => {
+					console.log(`DECK ${this.props.deckIndex}: success`);
+					this.setState(() => ({
+						userData,
+						authenticated: true,
+						userDataFetchStatus: 'success'
+					}));
+				})
+				.catch((error) => {
+					console.log(`DECK ${this.props.deckIndex}: failed`);
+					const authenticated = error === 'unauthorized' ? false : undefined;
+					this.setState(() => ({
+						authenticated,
+						userDataFetchStatus: 'failed'
+					}));
+				});
+				
+			}
+			else {
+				console.log(`DECK ${this.props.deckIndex}: failed2`);
 				this.setState(() => ({
-					authenticated,
-					userDataFetchStatus: 'failed'
-				}));
-			});
-			
-		}
-		else {
-			this.setState(() => ({
-				authenticated: false,
-				userData: undefined,
-				userDataFetchStatus: undefined
-			}))
+					authenticated: false,
+					userData: undefined,
+					userDataFetchStatus: undefined
+				}))
+			}
 		}
 	}
 	
@@ -76,7 +82,6 @@ class RedditUserDisplay extends Component {
 			this.props.onReadyStatusChanged(!!this.state.authenticated);
 		}
 	}
-	
 	
 	render() {
 		const deck = this.props.deckIndex === 0 ? 'A' : 'B';
@@ -102,12 +107,12 @@ class RedditUserDisplay extends Component {
 							<Icon name='id card outline'/>
 							{userId}
 						</Label>
-						
+
 						<div style={{marginTop: 8}}>
 							{authenticated && <div style={{color: 'green', fontWeight: 'bold'}}>Ready</div>}
 							{!authenticated && <div style={{color: 'red', fontWeight: 'bold'}}>Not Ready</div>}
 						</div>
-						
+
 					</Card.Description>
 
 				</Card.Content>
