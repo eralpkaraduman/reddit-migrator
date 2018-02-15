@@ -21,7 +21,7 @@ class AuthStep extends Component {
 
     if (hashJson) {
       Reddit.loadAuthDataFromHashJson(hashJson);
-      window.location.hash = ''; // removed the hash and reloads the page
+      window.location.hash = ''; // removes the hash and reloads the page
     }
 
     this.loadAuthDataFromLocalStorage();
@@ -36,8 +36,8 @@ class AuthStep extends Component {
   handleOnContinueClicked = () => {
     this.props.onStepCompleted({
       accessTokens: [
-        'dsgfdhgjh',
-        'jhkgfhdgf',
+        this.state.tokenDataDeckA,
+        this.state.tokenDataDeckB,
       ]
     });
   }
@@ -61,7 +61,7 @@ class AuthStep extends Component {
       this.setState(() => ({ userIdDeckA: userId }));
     }
     else if (deckIndex === 1) {
-      this.setState(() => ({ userIdDeckA: userId }));
+      this.setState(() => ({ userIdDeckB: userId }));
     }
   }
 
