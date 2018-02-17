@@ -37,7 +37,6 @@ class RedditUserDisplay extends Component {
 				// Fetcing user data from reddit
 				Reddit.fetchRedditApi(accessToken, 'me')
 				.then(userData => {
-					console.log(`DECK ${this.props.deckIndex}: success`);
 					this.setState(() => ({
 						userData,
 						authenticated: true,
