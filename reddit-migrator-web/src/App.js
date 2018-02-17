@@ -3,83 +3,85 @@ import { Icon, Step, Grid } from 'semantic-ui-react';
 import _ from 'underscore';
 
 import AuthStep from './steps/auth/AuthStep';
+import SelectSubscriptionsState from './steps/selectSubscriptionsState/SelectSubscriptionsState';
+import MoveState from './steps/moveState/MoveState';
 
 const AppStep = {
   AUTH: 'AUTH',
   SELECT: 'SELECT',
-  MOVE: 'AUTH',
-}
+  MOVE: 'MOVE',
+};
 
-const getIndexOfStepId = stepId => _.indexOf(Object.keys(Step), stepId);
-
-const steps = [
-  {
-    id: AppStep.AUTH,
+const stepConfiguration = {
+  [AppStep.AUTH]: {
     title: 'Authenticate',
     icon: 'key',
     description: 'Grant access to your Reddit accounts',
     component: AuthStep
   },
-  {
-    id: AppStep.SELECT,
+  [AppStep.SELECT]: {
     title: 'Select Subscriptions',
     icon: 'checkmark box',
     description: 'Choose subscriptions to move',
-    component: AuthStep
+    component: SelectSubscriptionsState
   },
-  {
-    id: AppStep.MOVE,
+  [AppStep.MOVE]: {
     title: 'Move!',
     icon: 'truck',
     description: 'View progress of moving subscriptions',
-    component: AuthStep
+    component: MoveState
   }
-];
+};
 
 const initialState = {
-  currentStepIndex: 0,
+  currentStepId: AppStep.AUTH,
   accessTokens: []
 }
 
 class App extends Component {
-  
   state = {...initialState};
 
   handleOnStepCompleted = (data) => {
-    const {currentStepIndex} = this.state;
-    const currentStepId = steps[currentStepIndex].id;
-    switch (currentStepId) {
+    switch (this.state.currentStepId) {
+
       case AppStep.AUTH:
-        const {accessTokens} = data;
         this.setState(() => ({
-          accessTokens,
-          currentStepIndex: getIndexOfStepId(AppStep.SELECT)
+          accessTokens: data.accessTokens,
+          currentStepId: AppStep.SELECT
         }));
         break;
+
       case AppStep.SELECT:
         console.log('handleOnStepCompleted of SELECT is not implemented');
         break;
+
       case AppStep.MOVE:
         console.log('handleOnStepCompleted of MOVE is not implemented');
         break;
+
     }
     this.setState(() => data);
   }
 
   render() {
-    const {currentStepIndex} = this.state;
-    const ContentComponent = steps[this.state.currentStepIndex].component;
+    const {currentStepId} = this.state;
+    const ContentComponent = stepConfiguration[currentStepId].component;
+    const arrayOfSteps = _.keys(stepConfiguration).map(stepId => ({
+      ...stepConfiguration[stepId],
+      id: stepId
+    }));
+
     return (
       <div style={{margin: 10}}>
         <Grid>
           <Grid.Column>
             <h1>Reddit Migrator</h1>
             <Step.Group fluid vertical={false} unstackable>
-              {steps.map((step, stepIndex) => 
+              {arrayOfSteps.map(step => 
                 <Step
-                  key={stepIndex}
-                  completed={this.state.currentStepIndex > stepIndex}
-                  active={this.state.currentStepIndex === stepIndex}
+                  key={step.id}
+                  completed={currentStepId > step.id}
+                  active={currentStepId === step.id}
                 >
                   <Icon name={step.icon} />
                   <Step.Content>
