@@ -30,6 +30,7 @@ class AuthStep extends Component {
   loadAuthDataFromLocalStorage() {
     const tokenDataDeckA = Reddit.loadAuthResponseDataFromLocalStorage(0);
     const tokenDataDeckB = Reddit.loadAuthResponseDataFromLocalStorage(1);
+    // TODO: Maybe refresh these tokens here?
     this.setState(() => ({ tokenDataDeckA, tokenDataDeckB }));
   }
 
@@ -136,13 +137,21 @@ class AuthStep extends Component {
             </Message>
           }
 
-          <Button
+          {/* <Button
             primary
             floated='right'
             disabled={ canContinue }
             style={ { marginTop: 12 } }
             onClick={ this.handleOnContinueClicked }>
             Continue
+          </Button> */}
+
+          <Button
+            primary
+            floated='right'
+            style={ { marginTop: 12 } }
+            onClick={ this.handleOnContinueClicked }>
+            ContinueLOL
           </Button>
         </Grid.Column>
       </Grid>

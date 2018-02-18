@@ -8,7 +8,7 @@ var CLIENT_ID = process.env.REDDIT_CONSUMER_KEY;
 var CLIENT_SECRET = process.env.REDDIT_CONSUMER_SECRET;
 var REDDIT_REDIRECT_URI = process.env.REDDIT_REDIRECT_URI;
 var RESULT_REDIRECT_URI = process.env.RESULT_REDIRECT_URI;
-var DURATION = 'temporary';
+var DURATION = 'permanent';
 var GRANT_TYPE='authorization_code';
 var SCOPE_STRING = encodeURIComponent([
 	'identity',
