@@ -1,15 +1,16 @@
 import React, { Component } from 'react';
 import { Icon, Step, Grid } from 'semantic-ui-react';
 import _ from 'underscore';
+import { withRouter } from 'react-router'
 
 import AuthStep from './steps/auth/AuthStep';
 import SelectSubscriptionsState from './steps/selectSubscriptionsState/SelectSubscriptionsState';
 import MoveState from './steps/moveState/MoveState';
 
 const AppStep = {
-  AUTH: 'AUTH',
-  SELECT: 'SELECT',
-  MOVE: 'MOVE',
+  AUTH: 'auth',
+  SELECT: 'select',
+  MOVE: 'move',
 };
 
 const stepConfiguration = {
@@ -33,22 +34,38 @@ const stepConfiguration = {
   }
 };
 
+const arrayOfSteps = _.keys(stepConfiguration).map(stepId => ({
+  ...stepConfiguration[stepId],
+  id: stepId
+}));
+
 const initialState = {
-  currentStepId: AppStep.AUTH,
   accessTokens: []
 }
 
 class App extends Component {
   state = {...initialState};
 
+  componentDidUpdate() {
+  }
+
+  hashPathToStepId() {
+    const {location} = this.props;
+    const pathname = (location && location.pathname) || `/`;
+    const pathWithoutSlash = pathname.split('/')[1];
+    const compareIdToPath = stepId => stepId === pathWithoutSlash;
+    return _.values(AppStep).find(compareIdToPath) || AppStep.AUTH;
+  }
+
   handleOnStepCompleted = (data) => {
-    switch (this.state.currentStepId) {
+    const currentStepId = this.hashPathToStepId();
+    switch (currentStepId) {
 
       case AppStep.AUTH:
         this.setState(() => ({
           accessTokens: data.accessTokens,
-          currentStepId: AppStep.SELECT
         }));
+        window.location.hash = AppStep.SELECT;
         break;
 
       case AppStep.SELECT:
@@ -63,14 +80,12 @@ class App extends Component {
     this.setState(() => data);
   }
 
-  render() {
-    const {currentStepId} = this.state;
-    const ContentComponent = stepConfiguration[currentStepId].component;
-    const arrayOfSteps = _.keys(stepConfiguration).map(stepId => ({
-      ...stepConfiguration[stepId],
-      id: stepId
-    }));
 
+  render() {
+    const currentStepId = this.hashPathToStepId();
+    console.log({currentStepId});
+    const ContentComponent = stepConfiguration[currentStepId].component;
+    
     return (
       <div style={{margin: 10}}>
         <Grid>
@@ -91,12 +106,12 @@ class App extends Component {
                 </Step>
               )}
             </Step.Group>
-            
+
             <ContentComponent
               accessTokens={this.state.accessTokens}
               onStepCompleted={this.handleOnStepCompleted}
             />
-            
+
           </Grid.Column>
         </Grid>
       </div>
@@ -104,4 +119,4 @@ class App extends Component {
   }
 }
 
-export default App;
+export default withRouter(App);
