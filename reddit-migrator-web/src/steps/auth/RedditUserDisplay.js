@@ -24,7 +24,7 @@ class RedditUserDisplay extends Component {
 	}
 	
 	componentWillReceiveProps(nextProps) {
-		const {accessToken} = nextProps
+		const {accessToken, refreshToken} = nextProps;
 		const accessTokenChanged = accessToken !== this.props.accessToken;
 		if (accessTokenChanged) {
 			if (!_.isNull(accessToken) && !_.isEmpty(accessToken)) {
@@ -68,10 +68,10 @@ class RedditUserDisplay extends Component {
 		if (!_.isEqual(this.state.userData, prevState.userData)) {
 			const prevUserData = prevState.userData;
 			const prevUserId = prevUserData && prevUserData.id;
-			
+
 			const currentUserData = this.state.userData;
 			const currentUserId = currentUserData && currentUserData.id;
-			
+
 			if (!_.isEqual(currentUserId, prevUserId)) {
 				this.props.onUserIdChanged(currentUserId);
 			}
@@ -143,6 +143,7 @@ class RedditUserDisplay extends Component {
 RedditUserDisplay.propTypes = {
 	deckIndex: PropTypes.number.isRequired,
 	accessToken: PropTypes.string,
+	refreshToken: PropTypes.string,
 	onAuthenticate: PropTypes.func.isRequired,
 	onClearToken: PropTypes.func.isRequired,
 	onReadyStatusChanged: PropTypes.func.isRequired,
