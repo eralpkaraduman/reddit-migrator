@@ -4,6 +4,7 @@ import { Button, Grid, Card, Message } from 'semantic-ui-react';
 import RedditUserDisplay from './RedditUserDisplay';
 import * as Reddit from '../../RedditUtils';
 import _ from 'underscore';
+import R from 'ramda';
 
 class AuthStep extends Component {
 
@@ -30,8 +31,19 @@ class AuthStep extends Component {
   loadAuthDataFromLocalStorage() {
     const tokenDataDeckA = Reddit.loadAuthResponseDataFromLocalStorage(0);
     const tokenDataDeckB = Reddit.loadAuthResponseDataFromLocalStorage(1);
+
+    const refreshDeckSession = deckData => {
+      const {access_token, refresh_token} = deckData;
+      return Reddit.refreshSession(access_token, refresh_token);
+    }
+
     // TODO: Maybe refresh these tokens here?
-    this.setState(() => ({ tokenDataDeckA, tokenDataDeckB }));
+    refreshDeckSession(tokenDataDeckA)
+    .then(refreshDeckSession(tokenDataDeckB))
+    .then(() => this.setState(() => ({
+      tokenDataDeckA,
+      tokenDataDeckB 
+    })));
   }
 
   handleOnContinueClicked = () => {
@@ -137,22 +149,22 @@ class AuthStep extends Component {
             </Message>
           }
 
-          {/* <Button
+          <Button
             primary
             floated='right'
             disabled={ canContinue }
             style={ { marginTop: 12 } }
             onClick={ this.handleOnContinueClicked }>
             Continue
-          </Button> */}
+          </Button>
 
-          <Button
+          {/* <Button
             primary
             floated='right'
             style={ { marginTop: 12 } }
             onClick={ this.handleOnContinueClicked }>
             ContinueLOL
-          </Button>
+          </Button> */}
         </Grid.Column>
       </Grid>
     );

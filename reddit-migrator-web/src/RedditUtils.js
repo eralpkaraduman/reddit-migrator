@@ -90,3 +90,19 @@ export function fetchRedditApi(accessToken, endpoint, method = 'GET') {
 		.then(json => resolve(json));
 	});
 }
+
+export function refreshSession(accessToken, refreshToken) {
+	return new Promise((resolve, reject) => {
+		console.log({accessToken, refreshToken});
+
+		// https://github.com/reddit-archive/reddit/wiki/OAuth2#refreshing-the-token
+
+		// const fetchOptions = {
+		// 	method: 'post'
+		// }
+
+		// fetch(`https://www.reddit.com/api/v1/access_token`, fetchOptions)
+
+		resolve();
+	});
+}
