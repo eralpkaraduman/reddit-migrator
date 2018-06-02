@@ -4,7 +4,7 @@ import { Button, Grid, Card, Message } from 'semantic-ui-react';
 import RedditUserDisplay from './RedditUserDisplay';
 import * as Reddit from '../../RedditUtils';
 import _ from 'underscore';
-import R from 'ramda';
+import * as R from 'ramda';
 
 class AuthStep extends Component {
 
@@ -37,8 +37,19 @@ class AuthStep extends Component {
       return Reddit.refreshSession(access_token, refresh_token);
     }
 
+    const validateDeckData = deckData => new Promise((resolve, reject) => {
+      let valid = true;
+      if (!deckData) valid = false;
+      if (!R.has('access_token', deckData)) valid = false;
+      if (!R.has('refresh_token', deckData)) valid = false;
+      valid ? resolve() : reject()
+    });
+
     // TODO: Maybe refresh these tokens here?
-    refreshDeckSession(tokenDataDeckA)
+    
+    validateDeckData(tokenDataDeckA)
+    .thenrefreshDeckSession(tokenDataDeckA)
+    .validateDeckData(tokenDataDeckB)
     .then(refreshDeckSession(tokenDataDeckB))
     .then(() => this.setState(() => ({
       tokenDataDeckA,

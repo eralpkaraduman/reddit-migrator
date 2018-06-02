@@ -35,7 +35,7 @@ class RedditUserDisplay extends Component {
 				}));
 				
 				// Fetcing user data from reddit
-				Reddit.fetchRedditApi(accessToken, 'me')
+				Reddit.fetchRedditApi('me', accessToken)
 				.then(userData => {
 					this.setState(() => ({
 						userData,
