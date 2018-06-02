@@ -59,15 +59,21 @@ export function loadAuthResponseDataFromLocalStorage(deckIndex) {
 	return dataJson;
 }
 
-export function fetchRedditApi(accessToken, endpoint, method = 'GET') {
+export function fetchRedditApi(endpoint, accessToken = null, method = 'GET', body = null) {
 	return new Promise((resolve, reject) => {
 		
 		const headers = new Headers();
-		headers.append('Authorization', `bearer ${accessToken}`);
+		if (accessToken) {
+			headers.append('Authorization', `bearer ${accessToken}`);
+		}
 		
 		const fetchOptions = {
 			method,
 			headers
+		}
+
+		if (body) {
+			fetchOptions.body = body;
 		}
 		
 		fetch(`https://oauth.reddit.com/api/v1/${endpoint}`, fetchOptions)
@@ -103,6 +109,20 @@ export function refreshSession(accessToken, refreshToken) {
 
 		// fetch(`https://www.reddit.com/api/v1/access_token`, fetchOptions)
 
-		resolve();
+		fetchRedditApi(
+			'access_token',
+			accessToken,
+			'POST',
+			`grant_type=refresh_token&refresh_token=${refreshToken}`
+		)
+		.then(response => {
+			console.log({response});
+			resolve();
+		})
+		.catch(err => {
+			reject(err)
+		});
+
+		
 	});
 }
