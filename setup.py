@@ -6,14 +6,20 @@ setuptools.setup(
   author='Eralp Karaduman',
   author_email='eralp@eralpkaraduman.com',
   description='Migrates reddit subscriptions from one account to another',
-  packages=setuptools.find_packages(),
+  py_modules=['reddit_migrator'],
+  # packages=setuptools.find_packages(),
   install_requires=[
-    'click'
+    'Click',
+    'requests',
+    'praw'
   ],
   classifiers=(
     'License :: OSI Approved :: MIT License',
   ),
-  entry_points = {
-        'console_scripts': ['reddit_migrator=reddit_migrator.command_line:main'],
-    }
+  entry_points='''
+    [console_scripts]
+    reddit_migrator=reddit_migrator:cli
+  ''',
 )
+
+("EntryPoint must be in 'name=module:attrs [extras]' format", "reddit_migrator=reddit_migrator.cli'")
