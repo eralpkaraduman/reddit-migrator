@@ -6,7 +6,6 @@ setuptools.setup(
   author='Eralp Karaduman',
   author_email='eralp@eralpkaraduman.com',
   description='Migrates reddit subscriptions from one account to another',
-  py_modules=['reddit_migrator'],
   # packages=setuptools.find_packages(),
   install_requires=[
     'Click',
@@ -18,7 +17,7 @@ setuptools.setup(
   ),
   entry_points='''
     [console_scripts]
-    reddit_migrator=reddit_migrator:cli
+    reddit_migrator=cli:main
   ''',
 )
 
