@@ -10,14 +10,15 @@ setuptools.setup(
   install_requires=[
     'Click',
     'requests',
-    'praw'
+    'praw',
+    'pathlib'
   ],
   classifiers=(
     'License :: OSI Approved :: MIT License',
   ),
   entry_points='''
     [console_scripts]
-    reddit_migrator=cli:main
+    reddit_migrator=cli:cli
   ''',
 )
 
