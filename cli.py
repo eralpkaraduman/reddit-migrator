@@ -18,10 +18,6 @@ actions={
   'print_subscriptions': print_subscriptions
 }
 
-@click.group()
-def cli():
-    pass
-
 @click.command()
 @click.option('--nsfw_only', is_flag=True)
 @click.option('--omit_nsfw', is_flag=True)
@@ -30,7 +26,7 @@ def cli():
 @click.argument('action', type=click.Choice(actions.keys()))
 @click.option('--save_password', is_flag=True)
 @click.option('--load_password', is_flag=True)
-def main(from_user_username, from_user_password, action, omit_nsfw, nsfw_only, save_password, load_password):
+def cli(from_user_username, from_user_password, action, omit_nsfw, nsfw_only, save_password, load_password):
   """Reddit Migrator CLI"""
   click.echo("Reddit Migrator!")
   click.echo("From user: %s" % from_user_username)
