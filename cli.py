@@ -9,13 +9,29 @@ home = path.expanduser("~")
 session_config_dir = path.join(home, '.reddit_migrator')
 session_config_file_path = path.join(session_config_dir, 'session.ini')
 
-def print_subscriptions(username, password, omit_nsfw, nsfw_only):
-  subreddits = reddit_migrator.get_subreddits_of_user(username, password, omit_nsfw, nsfw_only)
+def print_subscriptions(options):
+  subreddits = reddit_migrator.get_subreddits_of_user(
+    options['from_user_username'],
+    options['from_user_password'],
+    options['omit_nsfw'],
+    options['nsfw_only']
+  )
+  for subrredit in subreddits:
+    print(subrredit)
+
+def migrate_subscriptions(options):
+  subreddits = reddit_migrator.get_subreddits_of_user(
+    options['from_user_username'],
+    options['from_user_password'],
+    options['omit_nsfw'],
+    options['nsfw_only']
+  )
   for subrredit in subreddits:
     print(subrredit)
 
 actions={
-  'print_subscriptions': print_subscriptions
+  'list': print_subscriptions,
+  'migrate': migrate_subscriptions
 }
 
 @click.command()
@@ -26,7 +42,19 @@ actions={
 @click.argument('action', type=click.Choice(actions.keys()))
 @click.option('--save_password', is_flag=True)
 @click.option('--load_password', is_flag=True)
-def cli(from_user_username, from_user_password, action, omit_nsfw, nsfw_only, save_password, load_password):
+@click.option('--to_user_username', type=click.STRING)
+@click.option('--to_user_password', type=click.STRING)
+def cli(
+  from_user_username,
+  from_user_password,
+  action,
+  omit_nsfw,
+  nsfw_only,
+  save_password,
+  load_password,
+  to_user_username,
+  to_user_password):
+
   """Reddit Migrator CLI"""
   click.echo("Reddit Migrator!")
   click.echo("From user: %s" % from_user_username)
@@ -38,11 +66,18 @@ def cli(from_user_username, from_user_password, action, omit_nsfw, nsfw_only, sa
     if not from_user_password:
       raise Exception('--from_user_password=PASSWORD is required')
     if save_password:
-      session_save(from_user_username, from_user_password)
+      session_save_password(from_user_username, from_user_password)
 
-  actions[action](from_user_username, from_user_password, omit_nsfw=omit_nsfw, nsfw_only=nsfw_only)
+  actions[action]({
+    'from_user_username':from_user_username,
+    'from_user_password':from_user_password,
+    'omit_nsfw':omit_nsfw,
+    'nsfw_only':nsfw_only,
+    'to_user_username':to_user_username,
+    'to_user_password':to_user_password
+  })
 
-def session_save(username, password):
+def session_save_password(username, password):
   session_config = session_load()
   click.echo("Saving password...")
   passwords_section = 'Passwords'
