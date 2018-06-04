@@ -1,14 +1,21 @@
 import configparser
 import praw
+import sys
+from os import path
 
-config = configparser.ConfigParser()
-config.read('config.ini')
-reddit_app_id = config['Reddit']['AppId']
-reddit_app_secret = config['Reddit']['AppSecret']
+def load_reddit_credentials():
+    config_path = path.normpath(path.join(path.dirname(path.realpath(__file__)), 'config.ini'))
+    config = configparser.ConfigParser()
+    config.read(config_path)
+    reddit_app_id = config['Reddit']['AppId']
+    reddit_app_secret = config['Reddit']['AppSecret']
+    return reddit_app_id, reddit_app_secret
 
 
 def authenticate(username, password):
     print('Authenticating %s' % username)
+    reddit_app_id, reddit_app_secret = load_reddit_credentials()
+    
     reddit = praw.Reddit(client_id=reddit_app_id,
                          client_secret=reddit_app_secret,
                          user_agent='script',
