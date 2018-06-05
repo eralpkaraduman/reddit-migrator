@@ -20,14 +20,34 @@ def print_subscriptions(options):
     print(subrredit)
 
 def migrate_subscriptions(options):
-  subreddits = reddit_migrator.get_subreddits_of_user(
-    options['from_user_username'],
-    options['from_user_password'],
-    options['omit_nsfw'],
-    options['nsfw_only']
+  from_user_username = options['from_user_username']
+  from_user_password = options['from_user_password']
+  to_user_username = options['to_user_username']
+  to_user_password = options['to_user_password']
+  omit_nsfw = options['omit_nsfw']
+  nsfw_only = options['nsfw_only']
+  
+  if not from_user_password:
+      raise Exception('--from_user_password=PASSWORD is required')
+  
+  if not to_user_username:
+      raise Exception('--to_user_username=USERNAME is required')
+      
+  if not to_user_password:
+      raise Exception('--to_user_password=PASSWORD is required')
+  
+  subreddits_to_migrate = reddit_migrator.get_subreddits_of_user(
+    from_user_username,
+    from_user_password,
+    omit_nsfw,
+    nsfw_only
   )
-  for subrredit in subreddits:
-    print(subrredit)
+  
+  reddit_migrator.subscribe_subbreddits_to_user(
+    options[to_user_username],
+    options[to_user_password],
+    subreddits_to_migrate
+  )
 
 actions={
   'list': print_subscriptions,
@@ -41,7 +61,7 @@ actions={
 @click.option('--from_user_password', prompt=False, hide_input=True)
 @click.argument('action', type=click.Choice(actions.keys()))
 @click.option('--save_password', is_flag=True)
-@click.option('--load_password', is_flag=True)
+@click.option('--load_passwords', is_flag=True)
 @click.option('--to_user_username', type=click.STRING)
 @click.option('--to_user_password', type=click.STRING)
 def cli(
@@ -60,13 +80,21 @@ def cli(
   click.echo("From user: %s" % from_user_username)
   click.echo("Action: %s" % action)
 
+  if not from_user_password and not load_password:
+    raise Exception('--from_user_password=PASSWORD is required')
+    
+  if to_user_username and not to_user_password and not load_password:
+    raise Exception('--to_user_password=PASSWORD is required')
+    
   if load_password:
     from_user_password = session_load_password(from_user_username)
-  else:
-    if not from_user_password:
-      raise Exception('--from_user_password=PASSWORD is required')
-    if save_password:
-      session_save_password(from_user_username, from_user_password)
+    if to_user_username:
+      to_user_password = session_load_password(to_user_username)
+  
+  if save_password:
+    session_save_password(from_user_username, from_user_password)
+    if to_user_username and to_user_password:
+      session_save_password(to_user_username, to_user_password)
 
   actions[action]({
     'from_user_username':from_user_username,

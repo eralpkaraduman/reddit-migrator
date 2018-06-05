@@ -46,3 +46,8 @@ def get_subreddits_of_user(username, password, omit_nsfw, nsfw_only):
             subreddits.append(subreddit)
 
     return subreddits
+
+def subscribe_subbreddits_to_user(username, password, subreddits):
+    print('Subscribing user to subreddits...')
+    reddit = authenticate(username, password)
+    print(reddit.user.me)
