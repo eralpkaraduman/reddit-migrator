@@ -16,8 +16,9 @@ And create a script app with similar settings to this screenshot:
   
 ![screenshot](https://github.com/eralpkaraduman/reddit-migrator/raw/master/creating-reddit-script-app.png)
 
-then change values in `reddit_migrator/config.ini`  
+create config.ini file in reddit_migrator folder with credentials `reddit_migrator/config.ini`  
 ```
+\[Reddit\]
 AppId=Q13UuMnxcKrXBw
 AppSecret=FOntQqMrmA4mxFXqLabbBt5u-sg
 ```
