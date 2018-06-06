@@ -12,7 +12,7 @@ $`pip install --editable .`
 
 go to: [reddit.com/prefs/apps](https://www.reddit.com/prefs/apps/)  
 And create a script app with similar settings to this screenshot:  
-![screenshot](https://raw.githubusercontent.com/eralpkaraduman/reddit-migrator/master/creating-reddit-script-app.png)
+![screenshot](https://github.com/eralpkaraduman/reddit-migrator/raw/master/creating-reddit-script-app.png)
 
 then change values in `reddit_migrator/config.ini`  
 ```
