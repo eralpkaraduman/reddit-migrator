@@ -1,3 +1,7 @@
+# WTF?
+
+An CLI Utility for copying or moving reddit subreddit subscriptions from one to another  
+
 # Installation
 
 $`python3 -m venv ./venv`  
