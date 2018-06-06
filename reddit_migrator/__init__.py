@@ -41,10 +41,11 @@ def get_subreddits_of_user(username, password, omit_nsfw, nsfw_only):
     print('Only NSFW: %s' % nsfw_only)
 
     subreddits = []
-    for subreddit in reddit.user.subreddits():
+    print(reddit.user.__class__)
+    for subreddit in reddit.user.subreddits(limit=3000):
         is_nsfw = subreddit.over18
         include = True
-
+        
         if omit_nsfw and is_nsfw:
             include = False
 
@@ -53,6 +54,8 @@ def get_subreddits_of_user(username, password, omit_nsfw, nsfw_only):
 
         if include:
             subreddits.append(subreddit.display_name)
+        else:
+            print("Skipping: %s" % subreddit.display_name)
 
     return subreddits
 
@@ -60,11 +63,10 @@ def get_subreddits_of_user(username, password, omit_nsfw, nsfw_only):
 def subscribe_subbreddits_to_user(username, password, subreddits):
     print('Subscribing user to subreddits...')
     reddit = authenticate(username, password)
-    subreddit_name = subreddits[0]
-
-    print("Subscribing %s to: %s" % (username, subreddit_name))
-    subreddit = reddit.subreddit(subreddit_name)
-    subreddit.subscribe()
+    for subreddit_name in subreddits:
+        print("Subscribing %s to: %s" % (username, subreddit_name))
+        subreddit = reddit.subreddit(subreddit_name)
+        subreddit.subscribe()
 
 
 def unsubscribe_user_from_subreddits(username, password, subreddits):

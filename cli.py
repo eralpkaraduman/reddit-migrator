@@ -59,12 +59,17 @@ def unsubscribe_all(options):
     
     subreddits = reddit_migrator.get_subreddits_of_user(from_user_username, from_user_password, omit_nsfw, nsfw_only)
     reddit_migrator.unsubscribe_user_from_subreddits(from_user_username, from_user_password, subreddits)
+    
+def migrate_subscriptions_then_unsubscribe(options):
+    migrate_subscriptions(options)
+    unsubscribe_all(options)
 
 
 actions = {
     'list': print_subscriptions,
     'migrate': migrate_subscriptions,
-    'unsubscribe': unsubscribe_all
+    'unsubscribe': unsubscribe_all,
+    'migrate_and_unsubscribe': migrate_subscriptions_then_unsubscribe,
 }
 
 
