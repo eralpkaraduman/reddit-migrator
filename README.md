@@ -1,4 +1,4 @@
-# REDDIT MIGRATOR?
+# REDDIT MIGRATOR
 
 An CLI Utility for copying or moving reddit subreddit subscriptions from one to another  
 
