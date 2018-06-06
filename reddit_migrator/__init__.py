@@ -2,9 +2,18 @@ import configparser
 import praw
 import sys
 from os import path
+import logging
+
+handler = logging.StreamHandler()
+handler.setLevel(logging.DEBUG)
+logger = logging.getLogger('prawcore')
+logger.setLevel(logging.DEBUG)
+logger.addHandler(handler)
+
 
 def load_reddit_credentials():
-    config_path = path.normpath(path.join(path.dirname(path.realpath(__file__)), 'config.ini'))
+    config_path = path.normpath(
+        path.join(path.dirname(path.realpath(__file__)), 'config.ini'))
     config = configparser.ConfigParser()
     config.read(config_path)
     reddit_app_id = config['Reddit']['AppId']
@@ -15,7 +24,7 @@ def load_reddit_credentials():
 def authenticate(username, password):
     print('Authenticating %s' % username)
     reddit_app_id, reddit_app_secret = load_reddit_credentials()
-    
+
     reddit = praw.Reddit(client_id=reddit_app_id,
                          client_secret=reddit_app_secret,
                          user_agent='script',
@@ -43,11 +52,25 @@ def get_subreddits_of_user(username, password, omit_nsfw, nsfw_only):
             include = False
 
         if include:
-            subreddits.append(subreddit)
+            subreddits.append(subreddit.display_name)
 
     return subreddits
+
 
 def subscribe_subbreddits_to_user(username, password, subreddits):
     print('Subscribing user to subreddits...')
     reddit = authenticate(username, password)
-    print(reddit.user.me)
+    subreddit_name = subreddits[0]
+
+    print("Subscribing %s to: %s" % (username, subreddit_name))
+    subreddit = reddit.subreddit(subreddit_name)
+    subreddit.subscribe()
+
+
+def unsubscribe_user_from_subreddits(username, password, subreddits):
+    print('Unsubscribing user from subreddits...')
+    reddit = authenticate(username, password)
+    for subreddit_name in subreddits:
+        subreddit = reddit.subreddit(subreddit_name)
+        print("Unsubscribing %s from: %s" % (username, subreddit_name))
+        subreddit.unsubscribe()
