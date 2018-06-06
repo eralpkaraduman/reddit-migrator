@@ -8,6 +8,18 @@ $`python3 -m venv ./venv`
 $`source venv/bin/activate`  
 $`pip install --editable .`  
 
+# Creating the Reddit app
+
+go to: [reddit.com/prefs/apps](https://www.reddit.com/prefs/apps/)  
+And create a script app with similar settings to this screenshot:  
+![screenshot](https://raw.githubusercontent.com/eralpkaraduman/reddit-migrator/master/creating-reddit-script-app.png)
+
+then change values in `reddit_migrator/config.ini`  
+```
+AppId=Q13UuMnxcKrXBw
+AppSecret=FOntQqMrmA4mxFXqLabbBt5u-sg
+```
+
 # Usage
 
 `reddit_migrator --help`  
