@@ -28,9 +28,9 @@ AppSecret=FOntQqMrmA4mxFXqLabbBt5u-sg
 `reddit_migrator --help`  
 
 ```
-reddit_migrator account_a migrate_and_unsubscribe /  
---from_user_password=password_a /  
---to_user_username=account_b /  
+reddit_migrator account_a migrate_and_unsubscribe \  
+--from_user_password=password_a \  
+--to_user_username=account_b \  
 --to_user_password=password_b  
 ```
 
@@ -41,7 +41,7 @@ And to load them next time add;
 `--load-passwords` 
 
 ```
-reddit_migrator account_a migrate_and_unsubscribe /  
---to_user_username=account_b /  
+reddit_migrator account_a migrate_and_unsubscribe \  
+--to_user_username=account_b \  
 --load_passwords  
 ```
