@@ -26,13 +26,15 @@ AppSecret=FOntQqMrmA4mxFXqLabbBt5u-sg
 # Usage
 
 `reddit_migrator --help`  
-
+example;  
+```bash
+reddit_migrator FROM_USER_NAME migrate_and_unsubscribe \
+--from_user_password=FROM_USER_PASSWORD \
+--to_user_username=TO_USER_NAME \
+--to_user_password=TO_USER_PASSWORD \
+--nsfw_only
 ```
-reddit_migrator account_a migrate_and_unsubscribe \  
---from_user_password=password_a \  
---to_user_username=account_b \  
---to_user_password=password_b  
-```
+(Replace the parts written in ALL_CAPS with your own)
 
 It can save the passwords if you add;  
 `--save-passwords`
